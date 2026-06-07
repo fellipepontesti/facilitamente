@@ -1,7 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
   provider = "prisma-client"
@@ -10,4 +6,43 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum UserType {
+  PSICOLOGO
+  PACIENTE
+}
+
+model User {
+  id               String    @id @default(uuid())
+  tipo             UserType
+  
+  // Campos comuns para psicologo e paciente
+  nome             String
+  email            String    @unique
+  senha            String
+  cpf              String    @unique
+  telefone         String
+  ativo            Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Campos psicologo
+  crp              String?
+  especialidade    String?
+  abordagem        String?
+
+  // Campos paciente
+  dataNascimento   DateTime? @map("data_nascimento")
+  profissao        String?
+  contato          String?
+  contatoEmergencia String?  @map("contato_emergencia")
+  observacoes      String?   @db.Text
+  psicologoId      String?   @map("psicologo_id")
+
+  // Relacionamentos
+  psicologo        User?     @relation("PsicologoPacientes", fields: [psicologoId], references: [id])
+  pacientes        User[]    @relation("PsicologoPacientes")
+
+  @@map("users")
 }

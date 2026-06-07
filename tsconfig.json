@@ -1,15 +1,22 @@
 {
-  "$schema": "https://www.schemastore.org/tsconfig",
-  "_version": "20.1.0",
-
   "compilerOptions": {
-    "lib": ["es2023"],
-    "module": "nodenext",
-    "target": "es2022",
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler", 
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    "paths": {
+      "@domain/*": ["./src/domain/*"],
+      "@infra/*": ["./src/infra/*"],
+      "@ui/*": ["./src/ui/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@db/*": ["./src/generated/*"]
+    },
 
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "moduleResolution": "node16"
-  }
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts"]
 }
