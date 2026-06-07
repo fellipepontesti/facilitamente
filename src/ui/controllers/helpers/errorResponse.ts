@@ -16,7 +16,7 @@ export function errorResponse(res: FastifyReply, error: unknown): FastifyReply {
 
   if (status === 500) {
     if (process.env.NODE_ENV !== 'test') {
-      console.error('💥 Internal Server Error:', error)
+      console.error('Internal Server Error:', error)
     }
 
     responseBody = {
