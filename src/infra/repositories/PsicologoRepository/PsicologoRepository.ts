@@ -10,6 +10,7 @@ import { prisma } from '@infra/prisma/Client'
 function toPsicologo(user: User): Psicologo {
   return {
     id: user.id,
+    uuid: user.uuid,
     nome: user.nome,
     email: user.email,
     cpf: user.cpf,
@@ -51,9 +52,9 @@ export class PrismaPsicologoRepository implements PsicologoRepository {
     return users.map(toPsicologo)
   }
 
-  async findById(id: string): Promise<Psicologo | null> {
+  async findByUuid(uuid: string): Promise<Psicologo | null> {
     const user = await prisma.user.findFirst({
-      where: { id, tipo: 'PSICOLOGO' },
+      where: { uuid, tipo: 'PSICOLOGO' },
     })
 
     return user ? toPsicologo(user) : null
@@ -75,18 +76,18 @@ export class PrismaPsicologoRepository implements PsicologoRepository {
     return user ? toPsicologo(user) : null
   }
 
-  async update(id: string, data: UpdatePsicologoData): Promise<Psicologo> {
+  async update(uuid: string, data: UpdatePsicologoData): Promise<Psicologo> {
     const user = await prisma.user.update({
-      where: { id },
+      where: { uuid },
       data,
     })
 
     return toPsicologo(user)
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(uuid: string): Promise<void> {
     await prisma.user.delete({
-      where: { id },
+      where: { uuid },
     })
   }
 }

@@ -1,23 +1,23 @@
 import { updatePsicologoFactory } from '@domain/usecases/Psicologo/UpdatePsicologo/UpdatePsicologoFactory'
 import { dataResponse } from '@ui/controllers/helpers/dataResponse'
 import { errorResponse } from '@ui/controllers/helpers/errorResponse'
-import type { FastifyReply, FastifyRequest } from 'fastify'
 import type {
-  PsicologoIdParams,
+  PsicologoUuidParams,
   UpdatePsicologoBody,
-} from '../PsicologoSchemas'
+} from '@ui/controllers/PsicologoControllers/PsicologoSchemas'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 export default class UpdatePsicologoController {
   async handle(
     req: FastifyRequest<{
-      Params: PsicologoIdParams
+      Params: PsicologoUuidParams
       Body: UpdatePsicologoBody
     }>,
     res: FastifyReply,
   ) {
     try {
       const useCase = updatePsicologoFactory()
-      const psicologo = await useCase.call(req.params.id, req.body)
+      const psicologo = await useCase.call(req.params.uuid, req.body)
 
       return dataResponse(res, 200, psicologo)
     } catch (error) {

@@ -20,7 +20,8 @@ const senhaSchema = z
   )
 
 export const psicologoResponseSchema = z.object({
-  id: z.string(),
+  id: z.number(),
+  uuid: z.string().uuid(),
   nome: z.string(),
   email: z.string(),
   cpf: z.string(),
@@ -31,8 +32,8 @@ export const psicologoResponseSchema = z.object({
   ativo: z.boolean(),
 })
 
-export const psicologoIdParamsSchema = z.object({
-  id: z.string().uuid('ID inválido'),
+export const psicologoUuidParamsSchema = z.object({
+  uuid: z.string().uuid('UUID inválido'),
 })
 
 export const createPsicologoBodySchema = z.object({
@@ -83,18 +84,18 @@ export const listPsicologosSchema = {
 }
 
 export const getPsicologoSchema = {
-  params: psicologoIdParamsSchema,
+  params: psicologoUuidParamsSchema,
   response: standardResponse(psicologoResponseSchema),
 }
 
 export const updatePsicologoSchema = {
-  params: psicologoIdParamsSchema,
+  params: psicologoUuidParamsSchema,
   body: updatePsicologoBodySchema,
   response: standardResponse(psicologoResponseSchema),
 }
 
 export const deletePsicologoSchema = {
-  params: psicologoIdParamsSchema,
+  params: psicologoUuidParamsSchema,
   response: {
     204: z.null(),
     ...standardResponse(psicologoResponseSchema),
@@ -103,4 +104,4 @@ export const deletePsicologoSchema = {
 
 export type CreatePsicologoBody = z.infer<typeof createPsicologoBodySchema>
 export type UpdatePsicologoBody = z.infer<typeof updatePsicologoBodySchema>
-export type PsicologoIdParams = z.infer<typeof psicologoIdParamsSchema>
+export type PsicologoUuidParams = z.infer<typeof psicologoUuidParamsSchema>

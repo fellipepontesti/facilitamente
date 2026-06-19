@@ -1,5 +1,5 @@
 import { psicologoRoutes } from '@ui/controllers/PsicologoControllers/PsicologoRoutes'
-import type { FastifyZodInstance } from '@ui/server/app.js'
+import type { FastifyZodInstance } from '@ui/server/app'
 
 export async function appRoutes(app: FastifyZodInstance) {
   app.get('/health', async () => {

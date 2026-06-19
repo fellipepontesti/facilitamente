@@ -1,16 +1,16 @@
-import type { FastifyZodInstance } from '@ui/server/app'
-import CreatePsicologoController from './CreatePsicologo'
-import DeletePsicologoController from './DeletePsicologo'
-import GetPsicologoController from './GetPsicologo'
-import ListPsicologosController from './ListPsicologos'
+import CreatePsicologoController from '@ui/controllers/PsicologoControllers/CreatePsicologo'
+import DeletePsicologoController from '@ui/controllers/PsicologoControllers/DeletePsicologo'
+import GetPsicologoController from '@ui/controllers/PsicologoControllers/GetPsicologo'
+import ListPsicologosController from '@ui/controllers/PsicologoControllers/ListPsicologos'
 import {
   createPsicologoSchema,
   deletePsicologoSchema,
   getPsicologoSchema,
   listPsicologosSchema,
   updatePsicologoSchema,
-} from './PsicologoSchemas'
-import UpdatePsicologoController from './UpdatePsicologo'
+} from '@ui/controllers/PsicologoControllers/PsicologoSchemas'
+import UpdatePsicologoController from '@ui/controllers/PsicologoControllers/UpdatePsicologo'
+import type { FastifyZodInstance } from '@ui/server/app'
 
 export async function psicologoRoutes(app: FastifyZodInstance) {
   app.post(
@@ -26,19 +26,19 @@ export async function psicologoRoutes(app: FastifyZodInstance) {
   )
 
   app.get(
-    '/psicologos/:id',
+    '/psicologos/:uuid',
     { schema: getPsicologoSchema },
     new GetPsicologoController().handle,
   )
 
   app.put(
-    '/psicologos/:id',
+    '/psicologos/:uuid',
     { schema: updatePsicologoSchema },
     new UpdatePsicologoController().handle,
   )
 
   app.delete(
-    '/psicologos/:id',
+    '/psicologos/:uuid',
     { schema: deletePsicologoSchema },
     new DeletePsicologoController().handle,
   )

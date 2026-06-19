@@ -1,4 +1,5 @@
 import type { FastifyReply } from 'fastify'
+import { ZodError } from 'zod'
 
 interface HttpResponse {
   statusCode: number
@@ -15,7 +16,8 @@ interface RequestError {
   message?: string
   errors?: string[]
   validation?: Array<{
-    instancePath: string
+    instancePath?: string
+    path?: Array<string | number>
     message: string
   }>
 }
@@ -66,6 +68,16 @@ function getStatus(error: unknown): number {
     return 400
   }
 
+  if (normalizedError.name === 'PrismaClientKnownRequestError') {
+    const code = (error as { code?: string }).code
+    if (code === 'P2025') return 404
+    return 400
+  }
+
+  if (normalizedError.name === 'PrismaClientValidationError') {
+    return 400
+  }
+
   switch (normalizedError.name) {
     case 'UnauthorizedError':
       return 401
@@ -90,7 +102,62 @@ function getStatus(error: unknown): number {
 }
 
 function mountJson(statusCode: number, error: unknown): HttpResponse {
+  if (error instanceof ZodError) {
+    const formattedFields: Record<string, string[]> = {}
+    error.issues.forEach((issue) => {
+      const fieldName = issue.path.join('.') || 'campo'
+      if (!formattedFields[fieldName]) formattedFields[fieldName] = []
+      formattedFields[fieldName].push(issue.message)
+    })
+    return {
+      statusCode: 400,
+      success: false,
+      error: {
+        type: 'ValidationError',
+        message: `${error.issues.length} problema(s) de validação encontrado(s).`,
+        errors: formattedFields,
+      },
+    }
+  }
+
   const normalizedError = normalizeError(error)
+
+  if (normalizedError.name === 'PrismaClientKnownRequestError') {
+    const prismaError = error as { code?: string; meta?: { target?: string[] } }
+    let msg = 'Erro na operação do banco de dados.'
+    const code = prismaError.code
+
+    if (code === 'P2002') {
+      const targets = prismaError.meta?.target || []
+      msg = `Já existe um registro com este(s) campo(s): ${targets.join(', ')}.`
+    } else if (code === 'P2025') {
+      msg = 'O registro solicitado não foi encontrado.'
+    } else {
+      msg = `Erro na operação do banco de dados (Código: ${code}).`
+    }
+
+    return {
+      statusCode,
+      success: false,
+      error: {
+        type: 'DatabaseError',
+        message: msg,
+      },
+    }
+  }
+
+  if (normalizedError.name === 'PrismaClientValidationError') {
+    return {
+      statusCode: 400,
+      success: false,
+      error: {
+        type: 'ValidationError',
+        message:
+          'Dados inválidos ou ausentes para a operação de banco de dados.',
+      },
+    }
+  }
+
   let message = normalizedError.message ?? 'Erro inesperado'
   let errors: string[] | Record<string, string[]> | undefined
 
@@ -98,7 +165,12 @@ function mountJson(statusCode: number, error: unknown): HttpResponse {
     const formattedFields: Record<string, string[]> = {}
 
     normalizedError.validation.forEach((valErr) => {
-      const fieldName = valErr.instancePath.replace(/^\//, '') || 'campo'
+      let fieldName = 'campo'
+      if (valErr.instancePath !== undefined) {
+        fieldName = valErr.instancePath.replace(/^\//, '') || 'campo'
+      } else if (valErr.path !== undefined && Array.isArray(valErr.path)) {
+        fieldName = valErr.path.join('.') || 'campo'
+      }
       if (!formattedFields[fieldName]) formattedFields[fieldName] = []
       formattedFields[fieldName].push(valErr.message)
     })

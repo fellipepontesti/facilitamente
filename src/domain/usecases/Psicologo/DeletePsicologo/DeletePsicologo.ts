@@ -4,13 +4,13 @@ import NotFoundError from '@shared/errors/NotFoundError'
 export default class DeletePsicologo {
   constructor(private readonly psicologoRepository: PsicologoRepository) {}
 
-  async call(id: string): Promise<void> {
-    const psicologo = await this.psicologoRepository.findById(id)
+  async call(uuid: string): Promise<void> {
+    const psicologo = await this.psicologoRepository.findByUuid(uuid)
 
     if (!psicologo) {
       throw new NotFoundError('Psicólogo não encontrado')
     }
 
-    await this.psicologoRepository.delete(id)
+    await this.psicologoRepository.delete(uuid)
   }
 }

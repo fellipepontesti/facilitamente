@@ -1,5 +1,6 @@
 export interface Psicologo {
-  id: string
+  id: number
+  uuid: string
   nome: string
   email: string
   cpf: string
@@ -38,9 +39,9 @@ export interface UpdatePsicologoData {
 export interface PsicologoRepository {
   create(data: CreatePsicologoData): Promise<Psicologo>
   findMany(): Promise<Psicologo[]>
-  findById(id: string): Promise<Psicologo | null>
+  findByUuid(uuid: string): Promise<Psicologo | null>
   findByEmail(email: string): Promise<Psicologo | null>
   findByCpf(cpf: string): Promise<Psicologo | null>
-  update(id: string, data: UpdatePsicologoData): Promise<Psicologo>
-  delete(id: string): Promise<void>
+  update(uuid: string, data: UpdatePsicologoData): Promise<Psicologo>
+  delete(uuid: string): Promise<void>
 }

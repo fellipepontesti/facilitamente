@@ -4,6 +4,7 @@ import type {
   PsicologoRepository,
 } from '@domain/repositories/PsicologoRepository'
 import ValidationError from '@shared/errors/ValidationError'
+import bcrypt from 'bcryptjs'
 
 export default class CreatePsicologo {
   constructor(private readonly psicologoRepository: PsicologoRepository) {}
@@ -23,6 +24,11 @@ export default class CreatePsicologo {
       throw new ValidationError('Já existe um psicólogo com este CPF')
     }
 
-    return this.psicologoRepository.create(data)
+    const hashedPassword = await bcrypt.hash(data.senha, 10)
+
+    return this.psicologoRepository.create({
+      ...data,
+      senha: hashedPassword,
+    })
   }
 }

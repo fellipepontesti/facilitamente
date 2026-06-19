@@ -5,12 +5,13 @@ import type {
 } from '@domain/repositories/PsicologoRepository'
 import NotFoundError from '@shared/errors/NotFoundError'
 import ValidationError from '@shared/errors/ValidationError'
+import bcrypt from 'bcryptjs'
 
 export default class UpdatePsicologo {
   constructor(private readonly psicologoRepository: PsicologoRepository) {}
 
-  async call(id: string, data: UpdatePsicologoData): Promise<Psicologo> {
-    const psicologo = await this.psicologoRepository.findById(id)
+  async call(uuid: string, data: UpdatePsicologoData): Promise<Psicologo> {
+    const psicologo = await this.psicologoRepository.findByUuid(uuid)
 
     if (!psicologo) {
       throw new NotFoundError('Psicólogo não encontrado')
@@ -36,6 +37,11 @@ export default class UpdatePsicologo {
       }
     }
 
-    return this.psicologoRepository.update(id, data)
+    const updateData = { ...data }
+    if (data.senha) {
+      updateData.senha = await bcrypt.hash(data.senha, 10)
+    }
+
+    return this.psicologoRepository.update(uuid, updateData)
   }
 }
