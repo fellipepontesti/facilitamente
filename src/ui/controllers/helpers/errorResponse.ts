@@ -10,6 +10,16 @@ interface HttpResponse {
   }
 }
 
+interface RequestError {
+  name?: string
+  message?: string
+  errors?: string[]
+  validation?: Array<{
+    instancePath: string
+    message: string
+  }>
+}
+
 export function errorResponse(res: FastifyReply, error: unknown): FastifyReply {
   const status = getStatus(error)
   let responseBody: HttpResponse
@@ -34,12 +44,29 @@ export function errorResponse(res: FastifyReply, error: unknown): FastifyReply {
   return res.status(responseBody.statusCode).send(responseBody)
 }
 
-function getStatus(error: any): number {
-  if (error.validation) {
+function normalizeError(error: unknown): RequestError {
+  if (error instanceof Error) {
+    return error as RequestError
+  }
+
+  if (typeof error === 'object' && error !== null) {
+    return error as RequestError
+  }
+
+  return {
+    name: 'BadRequestError',
+    message: 'Erro inesperado',
+  }
+}
+
+function getStatus(error: unknown): number {
+  const normalizedError = normalizeError(error)
+
+  if (normalizedError.validation) {
     return 400
   }
 
-  switch (error.name) {
+  switch (normalizedError.name) {
     case 'UnauthorizedError':
       return 401
 
@@ -47,6 +74,8 @@ function getStatus(error: any): number {
       return 403
 
     case 'NotFoundError':
+      return 404
+
     case 'ValidationError':
     case 'UseCaseError':
     case 'ServiceError':
@@ -60,14 +89,15 @@ function getStatus(error: any): number {
   }
 }
 
-function mountJson(statusCode: number, error: any): HttpResponse {
-  let message = error.message
-  let errors: any
+function mountJson(statusCode: number, error: unknown): HttpResponse {
+  const normalizedError = normalizeError(error)
+  let message = normalizedError.message ?? 'Erro inesperado'
+  let errors: string[] | Record<string, string[]> | undefined
 
-  if (error.validation) {
+  if (normalizedError.validation) {
     const formattedFields: Record<string, string[]> = {}
 
-    error.validation.forEach((valErr: any) => {
+    normalizedError.validation.forEach((valErr) => {
       const fieldName = valErr.instancePath.replace(/^\//, '') || 'campo'
       if (!formattedFields[fieldName]) formattedFields[fieldName] = []
       formattedFields[fieldName].push(valErr.message)
@@ -78,14 +108,14 @@ function mountJson(statusCode: number, error: any): HttpResponse {
       success: false,
       error: {
         type: 'ValidationError',
-        message: `${error.validation.length} problema(s) de validação encontrado(s) no formulário.`,
+        message: `${normalizedError.validation.length} problema(s) de validação encontrado(s) no formulário.`,
         errors: formattedFields,
       },
     }
   }
 
-  if (error.errors) {
-    errors = error.errors
+  if (normalizedError.errors) {
+    errors = normalizedError.errors
     message = `${errors?.length} problema(s) encontrado(s)`
   }
 
@@ -93,7 +123,7 @@ function mountJson(statusCode: number, error: any): HttpResponse {
     statusCode,
     success: false,
     error: {
-      type: error.name || 'BadRequestError',
+      type: normalizedError.name || 'BadRequestError',
       message,
       errors,
     },

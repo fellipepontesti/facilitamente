@@ -1,3 +1,4 @@
+import { errorResponse } from '@ui/controllers/helpers/errorResponse'
 import fastify from 'fastify'
 import {
   serializerCompiler,
@@ -12,6 +13,9 @@ export default async function buildApp() {
 
   app.setValidatorCompiler(validatorCompiler)
   app.setSerializerCompiler(serializerCompiler)
+  app.setErrorHandler((error, _req, res) => {
+    return errorResponse(res, error)
+  })
 
   return app.withTypeProvider<ZodTypeProvider>()
 }

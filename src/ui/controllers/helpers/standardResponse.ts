@@ -20,6 +20,7 @@ export function standardResponse<T extends z.ZodTypeAny>(successSchema: T) {
     400: errorResponseSchema,
     401: errorResponseSchema,
     403: errorResponseSchema,
+    404: errorResponseSchema,
     406: errorResponseSchema,
     409: z.object({
       success: z.boolean(),

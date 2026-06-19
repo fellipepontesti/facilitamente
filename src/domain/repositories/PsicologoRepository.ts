@@ -1,6 +1,46 @@
-import { User } from '@domain/entities/User'
+export interface Psicologo {
+  id: string
+  nome: string
+  email: string
+  cpf: string
+  telefone: string
+  crp: string
+  especialidade: string | null
+  abordagem: string | null
+  ativo: boolean
+  createdAt: Date
+  updatedAt: Date
+}
 
-export interface UserRepository {
-  create(user: User): Promise<User>
-  findByEmail(email: string): Promise<User | null>
+export interface CreatePsicologoData {
+  nome: string
+  email: string
+  senha: string
+  cpf: string
+  telefone: string
+  crp: string
+  especialidade?: string
+  abordagem?: string
+}
+
+export interface UpdatePsicologoData {
+  nome?: string
+  email?: string
+  senha?: string
+  cpf?: string
+  telefone?: string
+  crp?: string
+  especialidade?: string | null
+  abordagem?: string | null
+  ativo?: boolean
+}
+
+export interface PsicologoRepository {
+  create(data: CreatePsicologoData): Promise<Psicologo>
+  findMany(): Promise<Psicologo[]>
+  findById(id: string): Promise<Psicologo | null>
+  findByEmail(email: string): Promise<Psicologo | null>
+  findByCpf(cpf: string): Promise<Psicologo | null>
+  update(id: string, data: UpdatePsicologoData): Promise<Psicologo>
+  delete(id: string): Promise<void>
 }

@@ -5,6 +5,8 @@
     "moduleResolution": "Bundler", 
     "allowImportingTsExtensions": true,
     "noEmit": true,
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
 
     "paths": {
       "@domain/*": ["./src/domain/*"],
